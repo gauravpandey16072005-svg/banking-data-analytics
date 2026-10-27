@@ -1,468 +1,101 @@
 # Banking Customer & Transaction Analytics
 
-An end-to-end banking data analytics project focused on customer behavior, account activity, transaction trends, and loan performance using Python, Pandas, NumPy, MySQL, SQL, Excel, and Matplotlib.
+An end-to-end portfolio project using synthetic banking data to demonstrate data quality checks, exploratory analysis, MySQL business queries, baseline loan-default classification, and a Tableau dashboard build plan.
 
-> **Project note:** The analytical work was completed using Python and SQL. A Power BI dashboard was considered as a presentation layer but was not implemented in the final version of the project.
+> **Data note:** All data is synthetic and the results are not actual bank performance. In the generator, loan statuses are randomly assigned; the model is a workflow demonstration, not a valid credit-risk model.
 
----
+## Dataset
 
-## 1. Project Overview
+| Dataset | Rows (expected) | Main use |
+|---|---:|---|
+| Customers | 10,000 | Customer demographics and segmentation |
+| Accounts | 20,012 | Balances, account types and status |
+| Transactions | 383,242 | Transaction behavior, channels and trends |
+| Loans | 4,789 | Loan portfolio and default-status exploration |
 
-This project analyzes a synthetic banking dataset containing four related entities:
+CSV files are in `data/raw/`. A cleaned customer file is in `data/cleaned/`. Treat row counts as the expected project dataset sizes; verify them after regenerating or replacing data.
 
-- Customers
-- Accounts
-- Transactions
-- Loans
+## What is included
 
-The goal is to transform raw banking data into reliable analytical datasets, calculate meaningful banking KPIs, identify patterns and trends, and convert the findings into business-oriented suggestions.
+- **Data preparation:** generators for customers, accounts, transactions and loans.
+- **Cleaning and validation:** `python/clean_data.py` and `python/validate_data.py`.
+- **EDA and charts:** `python/eda.py`; existing PNG charts are included.
+- **Loan-default baseline:** `python/loan_default_model.py` trains Logistic Regression, uses a stratified train/test split and preprocessing pipeline, and reports accuracy, precision, recall, F1, ROC-AUC and a confusion matrix.
+- **MySQL analysis:** `sql/banking_analysis.sql` includes joins, aggregation, date trends, KPI queries, subqueries and referential-integrity checks.
+- **Tableau:** `docs/TABLEAU_DASHBOARD_GUIDE.md` gives a reproducible dashboard plan. A Tableau workbook is not currently included; create and validate it in Tableau before claiming a completed workbook.
 
-The project covers:
-
-- Data generation and preparation
-- Data cleaning
-- Data quality validation
-- Exploratory Data Analysis (EDA)
-- Descriptive statistics
-- SQL-based business analysis
-- Banking KPI calculation
-- Data visualization
-- Business insights and recommendations
-
----
-
-## 2. Business Objectives
-
-The analysis aims to answer questions such as:
-
-- How many customers, accounts, transactions, and loans are present?
-- Which customers have the highest total account balances?
-- Which customers show the highest transaction activity?
-- What is the total value of deposits and withdrawals?
-- How are transactions distributed across banking channels?
-- How has transaction value changed over time?
-- What is the size of the loan portfolio?
-- Which loan types are most common?
-- How many loans are defaulted?
-- What business actions can be suggested from the observed patterns?
-
----
-
-## 3. Dataset
-
-The project contains four related datasets.
-
-### Customers
-
-| Column | Description |
-|---|---|
-| `customer_id` | Unique customer identifier |
-| `name` | Customer name |
-| `age` | Customer age |
-| `gender` | Customer gender |
-| `city` | Customer city |
-| `occupation` | Customer occupation |
-| `account_open_date` | Account opening date |
-
-**Records:** 10,000
-
-### Accounts
-
-| Column | Description |
-|---|---|
-| `account_id` | Unique account identifier |
-| `customer_id` | Associated customer |
-| `account_type` | Type of bank account |
-| `balance` | Account balance |
-| `account_status` | Account status |
-| `account_open_date` | Account opening date |
-
-**Records:** 20,012
-
-### Transactions
-
-| Column | Description |
-|---|---|
-| `transaction_id` | Unique transaction identifier |
-| `account_id` | Associated account |
-| `transaction_date` | Transaction date |
-| `transaction_type` | Deposit or Withdrawal |
-| `amount` | Transaction amount |
-| `channel` | ATM, Online, Branch, or UPI |
-| `category` | Transaction category |
-
-**Records:** 383,242
-
-### Loans
-
-| Column | Description |
-|---|---|
-| `loan_id` | Unique loan identifier |
-| `customer_id` | Associated customer |
-| `account_id` | Associated account |
-| `loan_type` | Type of loan |
-| `loan_amount` | Loan amount |
-| `interest_rate` | Interest rate |
-| `loan_term_months` | Loan duration |
-| `loan_start_date` | Loan start date |
-| `loan_end_date` | Loan end date |
-| `loan_status` | Active, Closed, or Defaulted |
-| `monthly_payment` | Monthly payment |
-
-**Records:** 4,789
-
----
-
-## 4. Data Relationships
-
-The datasets have natural relational links:
-
-```text
-                    CUSTOMERS
-                   /         \
-                  /           \
-                 v             v
-            ACCOUNTS         LOANS
-                |
-                v
-          TRANSACTIONS
-```
-
-Key relationships:
-
-```text
-customers.customer_id  -> accounts.customer_id
-customers.customer_id  -> loans.customer_id
-accounts.account_id    -> transactions.account_id
-accounts.account_id    -> loans.account_id
-```
-
-This structure allows customer-level analysis by joining information across multiple tables.
-
----
-
-## 5. Data Cleaning & Quality Validation
-
-Python and Pandas were used to inspect, clean, and validate the datasets.
-
-Validation checks included:
-
-- Duplicate records
-- Missing values
-- Invalid customer IDs
-- Invalid account IDs
-- Invalid loan references
-- Invalid transaction types
-- Invalid transaction channels
-- Negative transaction amounts
-- Invalid dates
-- Invalid account statuses
-- Invalid loan statuses
-- Loan date consistency
-- Referential integrity between related datasets
-
-During validation, the account-status rule initially did not include the legitimate `Dormant` category. The rule was corrected and the validation was rerun.
-
-**Final result: all data-quality checks passed successfully.**
-
----
-
-## 6. Exploratory Data Analysis
-
-Python was used for exploratory and statistical analysis with:
-
-- Pandas
-- NumPy
-- Matplotlib
-
-The EDA covered:
-
-- Dataset structure and data types
-- Descriptive statistics
-- Transaction amount distribution
-- Deposit vs. withdrawal analysis
-- Monthly transaction trends
-- Transaction channel analysis
-- Loan analysis
-- Potential outlier detection using the IQR method
-- Banking KPI calculation
-
----
-
-## 7. SQL Analysis
-
-MySQL was used to analyze the relational banking data.
-
-SQL concepts used include:
-
-- `SELECT`
-- `WHERE`
-- `GROUP BY`
-- `HAVING`
-- `ORDER BY`
-- `INNER JOIN`
-- `LEFT JOIN`
-- `COUNT`
-- `SUM`
-- `AVG`
-- `MIN`
-- `MAX`
-- `CASE`
-- Subqueries
-
-Examples of analysis performed:
-
-- Customers with the highest total account balances
-- Customers with the highest transaction activity
-- Deposit vs. withdrawal value
-- Transaction analysis by channel
-- High-value transaction classification
-- Customers with the highest total loan amounts
-
----
-
-## 8. Key Banking KPIs
-
-| KPI | Value |
-|---|---:|
-| Total Customers | 10,000 |
-| Total Accounts | 20,012 |
-| Total Transactions | 383,242 |
-| Total Loans | 4,789 |
-| Total Account Balance | ₹788.94 Cr |
-| Average Account Balance | ₹3.94 L |
-| Total Transaction Value | ₹1,770.68 Cr |
-| Average Transaction Value | ₹46,202.54 |
-| Deposit Value | ₹970.74 Cr |
-| Withdrawal Value | ₹799.93 Cr |
-| Total Loan Value | ₹1,204.82 Cr |
-| Average Loan Amount | ₹25.16 L |
-| Defaulted Loans | 257 |
-| Loan Default Rate | 5.37% |
-
-> **Note:** The dataset is synthetic. These metrics describe the project's dataset and should not be interpreted as actual banking-industry figures.
-
----
-
-## 9. Visualizations
-
-The project currently includes Python-generated visualizations.
-
-### Monthly Transaction Value Trend
-
-![Monthly Transaction Trend](monthly_transaction_trend.png)
-
-### Transaction Channel Analysis
-
-![Transaction Channel Analysis](transaction_channel.png)
-
-These visualizations were created using Matplotlib as part of the exploratory analysis.
-
----
-
-## 10. Business Insights
-
-The analysis produced the following observations from the dataset:
-
-### 1. Transaction activity increased over time
-
-Monthly transaction value shows an overall upward trend across the 2023–2025 period, with particularly strong activity toward the later part of 2025.
-
-### 2. Deposits exceed withdrawals
-
-The dataset contains approximately:
-
-- **₹970.74 Cr** in deposits
-- **₹799.93 Cr** in withdrawals
-
-The difference is approximately **₹170.81 Cr**.
-
-### 3. Banking channels have relatively balanced activity
-
-ATM, Online, UPI, and Branch transactions have broadly similar transaction volumes in this dataset.
-
-### 4. Loan portfolio contains defaulted accounts
-
-There are **257 defaulted loans out of 4,789 loans**, corresponding to a dataset-level default rate of **5.37%**.
-
-### 5. Transaction amounts show substantial variation
-
-The average transaction amount is approximately **₹46,202.54**, while the median is approximately **₹44,760.54**, with a standard deviation of approximately **₹29,545.41**.
-
----
-
-## 11. Business Suggestions
-
-Based on the observed patterns, the following business-oriented suggestions were developed:
-
-### Customer engagement
-
-Customers with high balances or high transaction activity can be considered for targeted engagement, personalized banking offers, and relationship-management initiatives.
-
-### Transaction channels
-
-Since transaction activity is distributed across multiple channels, the bank can continue maintaining a consistent customer experience across ATM, Online, UPI, and Branch channels while monitoring channel-specific trends.
-
-### Loan risk monitoring
-
-The presence of defaulted loans suggests that loan portfolios should be monitored using indicators such as repayment behavior, loan type, outstanding amount, and customer history.
-
-### High-value transactions
-
-High-value transactions can be monitored separately to identify unusual patterns and support transaction-risk review processes.
-
-### Trend monitoring
-
-The upward monthly transaction trend can be monitored over time to understand changes in customer activity and transaction demand.
-
-> These are analytical suggestions based on patterns in the synthetic dataset, not conclusions about a real bank.
-
----
-
-## 12. Project Workflow
-
-```text
-Raw Banking Data
-       |
-       v
-Data Inspection
-       |
-       v
-Python / Pandas
-       |
-       v
-Data Cleaning
-       |
-       v
-Data Quality Validation
-       |
-       v
-MySQL Database
-       |
-       v
-SQL Analysis
-       |
-       v
-Python EDA & Statistics
-       |
-       v
-KPI Calculation
-       |
-       v
-Visualization
-       |
-       v
-Business Insights
-       |
-       v
-Business Suggestions
-```
-
----
-
-## 13. Project Structure
+## Repository structure
 
 ```text
 banking-data-analytics/
-|
 ├── data/
-│   ├── cleaned/
-│   │   └── customers_cleaned.csv
-│   |
-│   └── raw/
-│       ├── accounts.csv
-│       ├── customers.csv
-│       ├── loans.csv
-│       └── transactions.csv
-|
+│   ├── raw/                 # customers, accounts, transactions, loans
+│   └── cleaned/             # cleaned customer data
+├── docs/
+│   └── TABLEAU_DASHBOARD_GUIDE.md
+├── outputs/                 # model metrics/predictions generated at runtime
 ├── python/
 │   ├── clean_data.py
-│   ├── generate_accounts.py
+│   ├── eda.py
 │   ├── generate_data.py
-│   ├── generate_loans.py
+│   ├── generate_accounts.py
 │   ├── generate_transactions.py
+│   ├── generate_loans.py
 │   ├── inspect_data.py
 │   ├── validate_data.py
-│   └── eda.py
-|
+│   └── loan_default_model.py
+├── sql/
+│   └── banking_analysis.sql
 ├── monthly_transaction_trend.png
 ├── transaction_channel.png
+├── requirements.txt
 └── README.md
 ```
 
----
+## Setup (macOS/Linux)
 
-## 14. Tools & Technologies
-
-- **Python**
-- **Pandas**
-- **NumPy**
-- **Matplotlib**
-- **MySQL**
-- **SQL**
-- **Excel**
-- **Git & GitHub**
-
----
-
-## 15. How to Run
-
-### Clone the repository
+Run commands from the repository root:
 
 ```bash
-git clone https://github.com/gauravpandey16072005-svg/banking-data-analytics.git
-cd banking-data-analytics
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install --upgrade pip
+pip install -r requirements.txt
 ```
 
-### Create a virtual environment
+## Run the analysis
 
 ```bash
-python3 -m venv venv
-```
-
-### Activate the environment
-
-On macOS/Linux:
-
-```bash
-source venv/bin/activate
-```
-
-### Install Python dependencies
-
-```bash
-pip install pandas numpy matplotlib
-```
-
-### Run EDA and KPI analysis
-
-```bash
+python python/clean_data.py
+python python/validate_data.py
 python python/eda.py
+python python/loan_default_model.py
 ```
 
-The EDA script performs exploratory analysis, descriptive statistics, KPI calculations, and generates visualizations.
+The model script writes a fitted model, test predictions, and evaluation metrics under `outputs/`. It requires `data/raw/loans.csv`; customer age is included only when a compatible customer file is available.
 
----
+## MySQL analysis
 
-## 16. Future Scope
+1. Create a database, for example `banking_analytics`.
+2. Import each CSV into a table with its matching column names: `customers`, `accounts`, `transactions`, and `loans`.
+3. Open `sql/banking_analysis.sql` and run queries in MySQL Workbench or the MySQL client.
+4. Compare query results with Python EDA results. The SQL file assumes MySQL 8+ and the column names documented in the project.
 
-Possible extensions include:
+## Tableau dashboard
 
-- Power BI dashboard for interactive reporting
-- Customer segmentation
-- Deeper loan-risk analysis
-- Additional banking KPIs
-- Automated reporting
-- Advanced statistical analysis
-- Predictive analytics and machine learning
+Follow `docs/TABLEAU_DASHBOARD_GUIDE.md` to build a Banking Portfolio Overview with KPI cards, monthly transaction trends, channel analysis, account status, loan portfolio and top customers. Validate the workbook's totals against SQL before publishing. The guide is not a substitute for a finished Tableau workbook.
 
----
+## Model limitations
 
-## 17. Author
+The target is `loan_status == 'Defaulted'`. The synthetic generator assigns loan statuses randomly, independently of the loan features. Consequently, predictive metrics should **not** be presented as evidence of real credit-risk performance. A meaningful model requires realistic historical outcomes and features available before the default event, plus careful leakage checks and time-based validation.
 
-**Anand Pandey**
+## Next improvements
 
-B.Tech — Electronics & Communication Engineering  
-Malaviya National Institute of Technology, Jaipur
+- Add unit tests and a repeatable automated validation command.
+- Replace random loan labels with a realistic, documented synthetic risk process or an appropriately licensed real dataset.
+- Build and commit a validated Tableau workbook.
+- Add a database schema/import script and automated SQL-vs-Python KPI reconciliation.
 
-GitHub: `https://github.com/gauravpandey16072005-svg`
+## Author
+
+Anand Pandey · B.Tech, Electronics & Communication Engineering · MNIT Jaipur
