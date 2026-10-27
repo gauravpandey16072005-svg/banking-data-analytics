@@ -9,7 +9,6 @@ Metrics are a pipeline demonstration, not evidence of real-world predictive powe
 """
 from pathlib import Path
 import json
-import warnings
 
 import pandas as pd
 from sklearn.compose import ColumnTransformer
@@ -64,7 +63,7 @@ def main():
     categorical_features = ["loan_type"]
     features = numeric_features + categorical_features
     data = loans[features + [TARGET]].copy()
-    data = data.replace([float("inf"), float("-inf")], pd.NA).dropna(subset=[TARGET])
+    data = data.replace([float("inf"), float("-inf")], float("nan")).dropna(subset=[TARGET])
 
     if data[TARGET].nunique() != 2 or data[TARGET].value_counts().min() < 2:
         raise ValueError("Need at least two examples from each target class to train.")
